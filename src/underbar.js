@@ -285,11 +285,27 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    var args = Array.from(arguments);
+    for (var i = 1; i < args.length; i++) {
+      for (var keys in args[i]) {
+        obj[keys] = args[i][keys]; 
+      }  
+    }
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    var args = Array.from(arguments);
+    for (var i = 1; i < args.length; i++) {
+      for (var keys in args[i]) {
+        if (obj[keys] === undefined) {
+          obj[keys] = args[i][keys]; 
+        }  
+      }  
+    }
+    return obj;
   };
 
 
@@ -333,6 +349,15 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var cache = {};
+    return function () {
+      var args = JSON.stringify(arguments);
+      if (cache[args] === undefined) {
+        cache[args] = func.apply(this, arguments);
+        return cache[args];
+      }
+    };
+    
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -342,6 +367,14 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    
+    // var allArgs = Array.prototype.slice.call(arguments);
+    // var args = allArgs.slice(2);
+    var args = Array.from(arguments).slice(2); //must get arguments from outside the inner function
+    setTimeout(function() {
+      return func.apply(this, args); 
+//if you were to use Array.from(arguments).slice(2) directly here, you would be pointing to undefined arguments bc inner function);
+    }, wait);
   };
 
 
